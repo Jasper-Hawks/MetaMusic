@@ -1,0 +1,5 @@
+- [  ] Fix regex so that it can take input from directories that are on the same working directory
+- [  ] Create a CLI interface with the argparse library
+- [  ] Add status codes all throught to assure the user
+- [  ] Make it so that songs can also get their metadata scraped
+- [  ] Add a numbered flag
