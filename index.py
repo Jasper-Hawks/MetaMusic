@@ -1,4 +1,6 @@
 import os
+from mutagen.id3 import ID3
+from mutagen import mp3
 from ytmusicapi import YTMusic
 import json
 import re
@@ -65,18 +67,41 @@ sel = int(input("Make a selection:"))
 
 # Add a try catch here incase user puts something dumb
 albumContents = ytmusic.get_album(browseIDs[sel - 1])
+trackCount = int(albumContents["trackCount"])
 #print(json.dumps(albumContents, indent=4))
 
 dirTitles = []
-titles = []
-for tracks in albumContents["tracks"]:
-    titles.append(tracks)
+album = []
+songs = []
 
+for tracks in albumContents["tracks"]:
+    songs = []
+    songs.append(tracks["title"])
+    art = tracks["artists"]
+    art = art[0]
+    songs.append(art["name"])
+    songs.append(tracks["album"])
+    album.append(songs)
+
+
+album.append(albumContents["year"])
+thumb = albumContents["thumbnails"]
+thumb = thumb[3]
+album.append(thumb['url'])
+print(album)
 dirTitles = os.listdir()
+
+print(dirTitles)
 # Crossreference the songs in albumContents with those in the system
 
+currentDir = os.getcwd()
+
 for t in dirTitles:
-    for i in range(len(titles)):
-        if t.contains(titles[i]):
+  for i in range(trackCount - 1):
+      if album[i][0] in t:
+        audio = ID3(os.path.join(currentDir,t))
+        audio.add(TIT2(encoding=3,text=album[i][0]))
+        audio.save()
+
 
 
