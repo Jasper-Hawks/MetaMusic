@@ -1,6 +1,7 @@
 import os
-from mutagen.id3 import ID3
-from mutagen import mp3
+import requests
+from mutagen.id3 import ID3, TIT2, TALB, TPE1, TDRC, TRCK, APIC
+import mutagen
 from ytmusicapi import YTMusic
 import json
 import re
@@ -88,10 +89,26 @@ album.append(albumContents["year"])
 thumb = albumContents["thumbnails"]
 thumb = thumb[3]
 album.append(thumb['url'])
-print(album)
+
 dirTitles = os.listdir()
 
-print(dirTitles)
+img = requests.get(thumb['url']).content
+with open (album[0][2] + ".png","wb") as handler:
+    handler.write(img)
+
+albumImgs = os.listdir()
+
+for files in albumImgs:
+    if ".png" not in files:
+        albumImgs.remove(files)
+    elif ".png" in files:
+        albumImgs = files
+        break
+    else:
+        print("Album art was not generated")
+
+
+
 # Crossreference the songs in albumContents with those in the system
 
 currentDir = os.getcwd()
@@ -99,9 +116,16 @@ currentDir = os.getcwd()
 for t in dirTitles:
   for i in range(trackCount - 1):
       if album[i][0] in t:
-        audio = ID3(os.path.join(currentDir,t))
-        audio.add(TIT2(encoding=3,text=album[i][0]))
-        audio.save()
+        id3 = ID3()
+        id3.add(TIT2(encoding=3,text=album[i][0]))
+        id3.add(TPE1(encoding=3,text=album[i][1]))
+        id3.add(TALB(encoding=3,text=album[i][2]))
+        id3.add(TDRC(encoding=3,text=album[-2]))
+        id3.add(TRCK(encoding=3,text=str(i + 1)))
 
+        albumImgsFrame = mutagen.File(albumImgs)
+        id3.add(APIC(encoding=3,COVER_FRONT=albumImgsFrame))
+
+        id3.save(t,v2_version=4)
 
 
