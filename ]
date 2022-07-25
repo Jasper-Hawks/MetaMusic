@@ -117,7 +117,6 @@ albumImgs = os.listdir()
 for files in albumImgs:
     if files.endswith('.jpeg'):
         albumImgs = files
-        dirTitles.remove(albumImgs)
         print("Album art created as: " + albumImgs)
 #    else:
         #TODO Redo this
@@ -126,15 +125,15 @@ for files in albumImgs:
 
 
 # Crossreference the songs in albumContents with those in the system
-tracks = album
-tracks.pop(-1)
-tracks.pop(-1)
-print(tracks)
-print(dirTitles)
+
+currentDir = os.getcwd()
+
+print(album)
+
 for t in dirTitles:
-  for i in range(len(tracks)):
-      if tracks[i][0] in t:
-        print("Adding metadata to: " + tracks[i][0])
+  for i in range(trackCount - 1):
+      if album[i][0] in t:
+        print("Adding metadata to: " + album[i][0])
         id3 = ID3()
         id3.add(TIT2(encoding=3,text=album[i][0]))
         id3.add(TPE1(encoding=3,text=album[i][1]))
