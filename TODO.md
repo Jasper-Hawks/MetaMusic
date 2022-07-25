@@ -3,3 +3,4 @@
 - [  ] Add status codes all throught to assure the user
 - [  ] Make it so that songs can also get their metadata scraped
 - [  ] Add a numbered flag
+- [  ] Add a flag to replace the file names with the track titles(https://docs.python.org/3/library/os.html#os.replace)

@@ -1,7 +1,6 @@
 import os
 import requests
 from mutagen.id3 import ID3, TIT2, TALB, TPE1, TDRC, TRCK, APIC
-import mutagen
 from ytmusicapi import YTMusic
 import json
 import re
@@ -93,18 +92,16 @@ album.append(thumb['url'])
 dirTitles = os.listdir()
 
 img = requests.get(thumb['url']).content
-with open (album[0][2] + ".png","wb") as handler:
+with open (album[0][2] + ".jpeg","wb") as handler:
     handler.write(img)
 
 albumImgs = os.listdir()
 
 for files in albumImgs:
-    if ".png" not in files:
-        albumImgs.remove(files)
-    elif ".png" in files:
+    if files.endswith('.jpeg'):
         albumImgs = files
-        break
     else:
+        #TODO Redo this
         print("Album art was not generated")
 
 
@@ -113,6 +110,7 @@ for files in albumImgs:
 
 currentDir = os.getcwd()
 
+print(albumImgs)
 for t in dirTitles:
   for i in range(trackCount - 1):
       if album[i][0] in t:
@@ -123,8 +121,28 @@ for t in dirTitles:
         id3.add(TDRC(encoding=3,text=album[-2]))
         id3.add(TRCK(encoding=3,text=str(i + 1)))
 
-        albumImgsFrame = mutagen.File(albumImgs)
-        id3.add(APIC(encoding=3,COVER_FRONT=albumImgsFrame))
+
+        with open(albumImgs,'rb') as art:
+            id3['APIC'] = APIC(
+               encoding=3,
+               mime='image/jpeg',
+               type=3,desc=u'Cover',
+               data=art.read()
+            )
+        #TODO Error handling if art cant be added to a frame
+#       with open (albumImgs,'rb') as art:
+#           albumBytes = art.read()
+
+
+#        id3.add(APIC(encoding=3,mime='image/png',type=3,data=albumBytes))
+#        print(type(albumBytes))
+#        id3.add(APIC(encoding=3,mime='image/png',type=3,data=albumBytes))
+
+#       albumImgsFrame = mutagen.File(albumImgs)
+#        id3.add(APIC(encoding=3,COVER_FRONT=albumImgsFrame))
+#       with open(albumImgs, 'rb') as art:
+
+
 
         id3.save(t,v2_version=4)
 
