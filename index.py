@@ -1,10 +1,9 @@
-import os
-import requests
+import argparse, os, requests, re
 from mutagen.id3 import ID3, TIT2, TALB, TPE1, TDRC, TRCK, APIC
 from ytmusicapi import YTMusic
-import json
-import re
 
+
+parser = argparse.ArgumentParser(description="Add metadata to songs and albums with MetaMusic")
 # Set up the header files
 ytmusic = YTMusic("headers_auth.json")
 
@@ -65,10 +64,17 @@ def search(met, results,pg):
                     for i in range(len(results) - (25 * pg)):
                         results.pop(0)
 
+    print("\n")
+    c = 1
+    print("["+ str(c)+"]")
     for j in range(1,26):
        print(results[j-1])
        if j % 5 == 0 and j != 0:
            print("\n")
+           c += 1
+           print("["+ str(c)+"]")
+    print("Next Page")
+    print("\n")
 
     sel = int(input("Make a selection:"))
 
@@ -85,7 +91,7 @@ def search(met, results,pg):
 albumContents = search(met,results,pg)
 
 trackCount = int(albumContents["trackCount"])
-print(trackCount)
+print(str(trackCount) + " tracks found")
 
 dirTitles = []
 album = []
@@ -134,16 +140,12 @@ tracks.pop(-1)
 #   for i in range(len(escTracks)):
 #       escTracks[i][0] = re.sub('\'',r"'\ ''",escTracks[i][0])
 
-print(tracks)
-print(dirTitles)
+#print(tracks)
+#print(dirTitles)
 
 # Crossreference the songs in albumContents with those in the system
 for t in dirTitles:
   for i in range(len(tracks)):
-#     print()
-#     print(t)
-#     print("Checking: " + tracks[i][0])
-#     print()
       if re.search(tracks[i][0],t,re.IGNORECASE):
         print("Adding metadata to: " + tracks[i][0])
         id3 = ID3()
