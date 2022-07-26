@@ -1,9 +1,12 @@
+#!/bin/python3
 import argparse, os, requests, re
 from mutagen.id3 import ID3, TIT2, TALB, TPE1, TDRC, TRCK, APIC
 from ytmusicapi import YTMusic
 
 
 parser = argparse.ArgumentParser(description="Add metadata to songs and albums with MetaMusic")
+parser.parse_args()
+#parser.add_argument(metavar='S', type=str)
 # Set up the header files
 ytmusic = YTMusic("headers_auth.json")
 
@@ -88,81 +91,84 @@ def search(met, results,pg):
 
     return albumContents
 
-albumContents = search(met,results,pg)
+def getAlbum(albumContents):
 
-trackCount = int(albumContents["trackCount"])
-print(str(trackCount) + " tracks found")
+    print(str(albumContents["trackCount"]) + " tracks in " + albumContents["title"])
 
-dirTitles = []
-album = []
-songs = []
-
-for tracks in albumContents["tracks"]:
+    dirTitles = []
+    audioFiles = []
+    album = []
     songs = []
-    songs.append(tracks["title"])
-    art = tracks["artists"]
-    art = art[0]
-    songs.append(art["name"])
-    songs.append(tracks["album"])
-    album.append(songs)
+
+    for tracks in albumContents["tracks"]:
+        songs = []
+        songs.append(tracks["title"])
+        art = tracks["artists"]
+        art = art[0]
+        songs.append(art["name"])
+        songs.append(tracks["album"])
+        album.append(songs)
 
 
-album.append(albumContents["year"])
-thumb = albumContents["thumbnails"]
-thumb = thumb[3]
-album.append(thumb['url'])
+    album.append(albumContents["year"])
+    thumb = albumContents["thumbnails"]
+    thumb = thumb[3]
+    album.append(thumb['url'])
 
-dirTitles = os.listdir()
+    dirTitles = os.listdir()
 
-img = requests.get(thumb['url']).content
-with open (album[0][2] + ".jpeg","wb") as handler:
-    handler.write(img)
+    f = 0
+    # Clean the listed files for mp3 files
+    for files in dirTitles:
+        if files.endswith('.mp3'):
+            audioFiles.append(files)
+            f += 1
 
-albumImgs = os.listdir()
+    print("Found " + str(f) + " mp3 files")
 
-for files in albumImgs:
-    if files.endswith('.jpeg'):
-        albumImgs = files
-        dirTitles.remove(albumImgs)
-        print("Album art created as: " + albumImgs)
-#    else:
-        #TODO Redo this
-        #print("Album art was not generated")
+    img = requests.get(thumb['url']).content
+    with open (album[0][2] + ".jpeg","wb") as handler:
+        handler.write(img)
+
+    albumImgs = os.listdir()
+
+    for files in albumImgs:
+        if files.endswith('.jpeg'):
+            albumImgs = files
+            dirTitles.remove(albumImgs)
+            print("Album art created as: " + albumImgs)
 
 
-
-
-tracks = album
-tracks.pop(-1)
-tracks.pop(-1)
-#escTracks = tracks
-
-#   for i in range(len(escTracks)):
-#       escTracks[i][0] = re.sub('\'',r"'\ ''",escTracks[i][0])
-
-#print(tracks)
-#print(dirTitles)
+    tracks = album
+    tracks.pop(-1)
+    tracks.pop(-1)
 
 # Crossreference the songs in albumContents with those in the system
-for t in dirTitles:
-  for i in range(len(tracks)):
-      if re.search(tracks[i][0],t,re.IGNORECASE):
-        print("Adding metadata to: " + tracks[i][0])
-        id3 = ID3()
-        id3.add(TIT2(encoding=3,text=album[i][0]))
-        id3.add(TPE1(encoding=3,text=album[i][1]))
-        id3.add(TALB(encoding=3,text=album[i][2]))
-        id3.add(TDRC(encoding=3,text=album[-2]))
-        id3.add(TRCK(encoding=3,text=str(i + 1)))
+    f = 0
+    for t in dirTitles:
+      for i in range(len(tracks)):
+          if re.search(tracks[i][0],t,re.IGNORECASE):
+            print("Adding metadata to: " + tracks[i][0])
+            id3 = ID3()
+            id3.add(TIT2(encoding=3,text=album[i][0]))
+            id3.add(TPE1(encoding=3,text=album[i][1]))
+            id3.add(TALB(encoding=3,text=album[i][2]))
+            id3.add(TDRC(encoding=3,text=album[-2]))
+            id3.add(TRCK(encoding=3,text=str(i + 1)))
 
-        with open(albumImgs,'rb') as art:
-            id3['APIC'] = APIC(
-               encoding=3,
-               mime='image/jpeg',
-               type=3,desc=u'Cover',
-               data=art.read()
-            )
-        #TODO Error handling if art cant be added to a frame
+            with open(albumImgs,'rb') as art:
+                id3['APIC'] = APIC(
+                   encoding=3,
+                   mime='image/jpeg',
+                   type=3,desc=u'Cover',
+                   data=art.read()
+                )
+            #TODO Error handling if art cant be added to a frame
 
-        id3.save(t,v2_version=4)
+            id3.save(t,v2_version=4)
+            f += 1
 
+    print("MetaMusic added metadata to " + str(f) + " files")
+albumContents = search(met,results,pg)
+
+getAlbum(albumContents)

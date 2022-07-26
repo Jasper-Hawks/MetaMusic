@@ -5,6 +5,7 @@
 - [ ] Make it so that songs can also get their metadata scraped
 - [ ] Refactor id3 section
 - [ ] Rename variables for clarity
+- [ ] Handle duplicate files
 
 # Argparse/Flags
 - [ ] Create a CLI interface with the argparse library
