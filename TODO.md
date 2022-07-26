@@ -12,4 +12,10 @@
 - [  ] Add a flag to replace the file names with the track titles(https://docs.python.org/3/library/os.html#os.replace)
 
 # Bugs
-- [] Fix not all songs albums having metadata added to them 
+- [x] Fix not all songs albums having metadata added to them
+     SOLUTION Files and their metadata  can have small
+     variations in their titles. Some metadata has capitalized
+     two letter words downloaded files may have lowercase two
+     letter words.
+
+     Replaced the in keyword with a regex search that ignores cases

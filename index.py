@@ -125,15 +125,26 @@ for files in albumImgs:
 
 
 
-# Crossreference the songs in albumContents with those in the system
+
 tracks = album
 tracks.pop(-1)
 tracks.pop(-1)
+#escTracks = tracks
+
+#   for i in range(len(escTracks)):
+#       escTracks[i][0] = re.sub('\'',r"'\ ''",escTracks[i][0])
+
 print(tracks)
 print(dirTitles)
+
+# Crossreference the songs in albumContents with those in the system
 for t in dirTitles:
   for i in range(len(tracks)):
-      if tracks[i][0] in t:
+#     print()
+#     print(t)
+#     print("Checking: " + tracks[i][0])
+#     print()
+      if re.search(tracks[i][0],t,re.IGNORECASE):
         print("Adding metadata to: " + tracks[i][0])
         id3 = ID3()
         id3.add(TIT2(encoding=3,text=album[i][0]))
