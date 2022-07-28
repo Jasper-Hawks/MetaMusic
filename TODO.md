@@ -8,9 +8,9 @@
 - [ ] Handle duplicate files
 
 # Argparse/Flags
-- [ ] Create a CLI interface with the argparse library
-- [ ] Add a flag to replace the file names with the track titles(https://docs.python.org/3/library/os.html#os.replace)
--    [ ] Add a flag to add track numbers to the files
+- [x] Create a CLI interface with the argparse library
+- [x] Add a flag to replace the file names with the track titles(https://docs.python.org/3/library/os.html#os.replace)
+-    [x] Add a flag to add track numbers to the files
 
 # Bugs
 - [x] Fix songs missing metadata
@@ -20,3 +20,4 @@
      letter words.
 
      Replaced the in keyword with a regex search that ignores cases
+- [ ] Check for additional jpegs that are already in the directory
