@@ -30,6 +30,13 @@ if args.title:
 
     query = args.title
 
+
+elif args.song:
+
+    # I'm not that good at regex
+    query = re.sub('.*\W',dir)
+    # Get rid of the remaining period
+    query = re.sub('.$',query)
 else:
 # TODO Regex does not work with directories ending in a slash
 # Make regex to get rid of the slash
@@ -39,7 +46,13 @@ else:
     q = query.group()
     query = re.sub('\/','',q)
 
-met = ytmusic.search(query,filter='albums')
+if args.song:
+
+    met = ytmusic.search(query,filter='songs')
+
+else:
+    met = ytmusic.search(query,filter='albums')
+
 pg = 1
 
 def search(met, results,pg):
@@ -160,26 +173,13 @@ def getAlbum(albumContents):
     for t in dirTitles:
       for i in range(len(tracks)):
           if re.search(tracks[i][0],t,re.IGNORECASE):
-              if args.replace:
-                  os.rename(t,tracks[i][0]+".mp3")
-                  try:
-                      os.remove(t)
-                  except (FileNotFoundError):
-                      continue
 
-              if args.numbered:
-                  if args.replace:
-                      os.rename(tracks[i][0]+".mp3",str(i + 1) + "." + tracks[i][0] + ".mp3")
-                  else:
-                      os.rename(t,str(i + 1) + "." + t)
-
-                  try:
-                      os.remove(t)
-                  except (FileNotFoundError):
-                      continue
+              currentFileName = t
+              replacedFileName = ""
+              numberedFileName = ""
 
               print("Adding metadata to: " + tracks[i][0])
-              id3 = ID3()
+              id3 = ID3(t)
               id3.add(TIT2(encoding=3,text=tracks[i][0]))
               id3.add(TPE1(encoding=3,text=tracks[i][1]))
               id3.add(TALB(encoding=3,text=tracks[i][2]))
@@ -187,18 +187,37 @@ def getAlbum(albumContents):
               id3.add(TRCK(encoding=3,text=str(i + 1)))
 
               with open(albumImgs,'rb') as art:
-                  id3['APIC'] = APIC(
+                  id3.add(APIC(
                      encoding=3,
                      mime='image/jpeg',
                      type=3,desc=u'Cover',
                      data=art.read()
-                  )
-              #TODO Error handling if art cant be added to a frame
+                  ))
+#                 id3['APIC'] = APIC(
+#                    encoding=3,
+#                    mime='image/jpeg',
+#                    type=3,desc=u'Cover',
+#                    data=art.read()
+#                 )
+              # TODO Error handling if art cant be added to a frame
 
               id3.save(t,v2_version=4)
+
               f += 1
 
+              if args.replace:
+                  replacedFileName = tracks[i][0]+".mp3"
+                  os.replace(currentFileName,replacedFileName)
+                  currentFileName = tracks[i][0]+".mp3"
+
+              if args.numbered:
+                  numberedFileName = str(i + 1) + "." + currentFileName
+                  os.replace(currentFileName,numberedFileName)
+                  currentFileName = numberedFileName + currentFileName
+
+
     print("MetaMusic added metadata to " + str(f) + " files")
+
 albumContents = search(met,results,pg)
 
 getAlbum(albumContents)
