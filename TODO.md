@@ -2,15 +2,16 @@
 - [ ] Fix regex so that it can take input from directories that are on the same working directory
 - [x] Add status codes all throught to assure the user
 - [x] Have the ability to look at more than 5 searches
-- [ ] Make it so that songs can also get their metadata scraped
 - [ ] Refactor id3 section for clarity
 - [ ] Rename variables for clarity
 - [x] Handle duplicate files
+- [ ] Add error handling so that if there are no results something is printed to the screen
 
 # Argparse/Flags
 - [x] Create a CLI interface with the argparse library
 - [x] Add a flag to replace the file names with the track titles(https://docs.python.org/3/library/os.html#os.replace)
 -    [x] Add a flag to add track numbers to the files
+-    [ ] Add a flag to scrape data for songs
 
 # Bugs
 - [x] Fix songs missing metadata

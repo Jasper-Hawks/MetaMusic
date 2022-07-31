@@ -1,5 +1,5 @@
 #!/usr/bin/python3
-import argparse, os, requests, re
+import argparse, os, requests, re, json
 from mutagen.id3 import ID3, TIT2, TALB, TPE1, TDRC, TRCK, APIC
 from ytmusicapi import YTMusic
 
@@ -18,41 +18,11 @@ ytmusic = YTMusic("headers_auth.json")
 
 # TODO Replace this with stdin
 # Find the input to search
-dir = args.directory
-os.chdir(dir)
 # Use regex to parse the last directory for querying
 
 indRes = []
 results = []
 browseIDs = []
-
-if args.title:
-
-    query = args.title
-
-
-elif args.song:
-
-    # I'm not that good at regex
-    query = re.sub('.*\W',dir)
-    # Get rid of the remaining period
-    query = re.sub('.$',query)
-else:
-# TODO Regex does not work with directories ending in a slash
-# Make regex to get rid of the slash
-# TODO Regex doesnt work with passing in directories that the
-# user is currently on
-    query = re.search('\/(?:.(?!\/))+$',dir,re.MULTILINE)
-    q = query.group()
-    query = re.sub('\/','',q)
-
-if args.song:
-
-    met = ytmusic.search(query,filter='songs')
-
-else:
-    met = ytmusic.search(query,filter='albums')
-
 pg = 1
 
 def search(met, results,pg):
@@ -60,38 +30,73 @@ def search(met, results,pg):
     # albums/songs that match the query and
     # prints them to the screen
 
-    i = 0
-    prevDict = None
-    for d in met:
-        for val in d:
-            if i < (pg * 5):
-                if prevDict != d or prevDict == None:
+    if args.song:
+        i = 0
+        prevDict = None
+        for d in met:
+            for val in d:
+                if i < (pg * 5):
+                    if prevDict != d or prevDict == None:
 
-                  results.append(d["title"])
-                  # To find the artists since it is in a nested dictionary we need
-                  # to assign values to different variables
-                  a = d["artists"]
-                  art = a[0]
-                  results.append(art["name"])
-                  results.append(d["type"])
-                  results.append(d["year"])
+                      results.append(d["title"])
+                      # To find the artists since it is in a nested dictionary we need
+                      # to assign values to different variables
+                      a = d["artists"]
+                      art = a[0]
+                      results.append(art["name"])
+                      results.append(d["category"])
+                      album = d["album"]
+                      results.append(album["name"])
+                      t = d["thumbnails"]
+                      thumb = t[-1]
+                      results.append(thumb['url'])
+                      i+=1
+                      browseIDs.append(d["videoId"])
 
-                  t = d["thumbnails"]
-                  thumb = t[3]
-                  results.append(thumb['url'])
-                  i+=1
-                  browseIDs.append(d["browseId"])
+                    else:
 
-                else:
+                        break
 
-                    break
+                    # So we have as little repeating as possible
+                    prevDict = d
 
-                # So we have as little repeating as possible
-                prevDict = d
+                    if pg >= 2:
+                        for i in range(len(results) - (25 * pg)):
+                            results.pop(0)
+    else:
 
-                if pg >= 2:
-                    for i in range(len(results) - (25 * pg)):
-                        results.pop(0)
+        i = 0
+        prevDict = None
+        for d in met:
+            for val in d:
+                if i < (pg * 5):
+                    if prevDict != d or prevDict == None:
+
+                      results.append(d["title"])
+                      # To find the artists since it is in a nested dictionary we need
+                      # to assign values to different variables
+                      a = d["artists"]
+                      art = a[0]
+                      results.append(art["name"])
+                      results.append(d["type"])
+                      results.append(d["year"])
+
+                      t = d["thumbnails"]
+                      thumb = t[-1]
+                      results.append(thumb['url'])
+                      i+=1
+                      browseIDs.append(d["browseId"])
+
+                    else:
+
+                        break
+
+                    # So we have as little repeating as possible
+                    prevDict = d
+
+                    if pg >= 2:
+                        for i in range(len(results) - (25 * pg)):
+                            results.pop(0)
 
     print("\n")
     c = 1
@@ -110,12 +115,15 @@ def search(met, results,pg):
 # TODO Add a try catch here incase user puts something dumb
     if sel <= 5 and sel >= 1:
         sel = sel + ((pg - 1)  * 5)
-        albumContents = ytmusic.get_album(browseIDs[sel - 1])
+        if args.song:
+            contents = ytmusic.get_song(browseIDs[sel - 1])
+        else:
+            contents = ytmusic.get_album(browseIDs[sel - 1])
     elif sel == 6:
         pg += 1
-        albumContents = search(met,results,pg)
+        contents = search(met,results,pg)
 
-    return albumContents
+    return contents
 
 def getAlbum(albumContents):
 
@@ -193,12 +201,6 @@ def getAlbum(albumContents):
                      type=3,desc=u'Cover',
                      data=art.read()
                   ))
-#                 id3['APIC'] = APIC(
-#                    encoding=3,
-#                    mime='image/jpeg',
-#                    type=3,desc=u'Cover',
-#                    data=art.read()
-#                 )
               # TODO Error handling if art cant be added to a frame
 
               id3.save(t,v2_version=4)
@@ -218,6 +220,53 @@ def getAlbum(albumContents):
 
     print("MetaMusic added metadata to " + str(f) + " files")
 
-albumContents = search(met,results,pg)
+def getSong(songContents):
+    print("Get song data")
 
-getAlbum(albumContents)
+
+
+if args.title:
+
+    query = args.title
+    dir = args.directory
+    os.chdir(dir)
+
+elif args.song:
+
+    dir = os.path.realpath(args.directory)
+    dir = os.path.dirname(dir)
+    os.chdir(dir)
+
+    # I'm not that good at regex
+    query = re.search('[^\/]*$',args.directory)
+    q = query.group()
+    # Get rid of the remaining period
+    query = re.sub('....$','',q)
+    print(query)
+
+else:
+# TODO Regex does not work with directories ending in a slash
+# Make regex to get rid of the slash
+# TODO Regex doesnt work with passing in directories that the
+# user is currently on
+    dir = args.directory
+    os.chdir(dir)
+
+    query = re.search('\/(?:.(?!\/))+$',dir,re.MULTILINE)
+    q = query.group()
+    query = re.sub('\/','',q)
+
+if args.song:
+
+    met = ytmusic.search(query,filter='songs')
+
+    songContents = search(met,results,pg)
+    getSong(songContents)
+
+else:
+    met = ytmusic.search(query,filter='albums')
+
+    albumContents = search(met,results,pg)
+    getAlbum(albumContents)
+
+
