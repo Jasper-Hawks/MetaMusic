@@ -134,8 +134,9 @@ def getAlbum(albumContents):
     album = []
     songs = []
 
+    # Append all of the tracks in the album into an array
+    # for ease of applying tags
     for tracks in albumContents["tracks"]:
-        songs = []
         songs.append(tracks["title"])
         art = tracks["artists"]
         art = art[0]
@@ -144,15 +145,18 @@ def getAlbum(albumContents):
         album.append(songs)
 
 
+    # Since the year and thumbnails are all the same
+    # we don't need to put them in the nested arrays
     album.append(albumContents["year"])
     thumb = albumContents["thumbnails"]
     thumb = thumb[3]
     album.append(thumb['url'])
 
+    # Find the files in the cwd
     dirTitles = os.listdir()
 
     f = 0
-    # Clean the listed files for mp3 files
+    # Find all of the mp3 files
     for files in dirTitles:
         if files.endswith('.mp3'):
             audioFiles.append(files)
@@ -160,6 +164,7 @@ def getAlbum(albumContents):
 
     print("Found " + str(f) + " mp3 files")
 
+    # Write the thumbnail img to file
     img = requests.get(thumb['url']).content
     with open (album[0][2] + ".jpeg","wb") as handler:
         handler.write(img)
@@ -168,18 +173,21 @@ def getAlbum(albumContents):
 
     for files in albumImgs:
         if files.endswith('.jpeg'):
-            albumImgs = files
-            print("Album art created as: " + albumImgs)
+            print("Album art created as: " + files)
+            break
 
-
+    # Copy the album and remove the year and thumbnail so that we
+    # only have track data
     tracks = album.copy()
     tracks.pop(-1)
     tracks.pop(-1)
 
-# Crossreference the songs in albumContents with those in the system
+    # Crossreference the songs in albumContents with those in the system
     f = 0
     for t in dirTitles:
       for i in range(len(tracks)):
+          # Ignore the cases because files and and data titles may
+          # capitilize different words
           if re.search(tracks[i][0],t,re.IGNORECASE):
 
               currentFileName = t
@@ -221,28 +229,58 @@ def getAlbum(albumContents):
     print("MetaMusic added metadata to " + str(f) + " files")
 
 def getSong(songContents):
-    print("Get song data")
 
+    songData = []
+    files = os.listdir()
 
+    details = songContents["videoDetails"]
+    songData.append(details["title"])
+    songData.append(details["author"])
 
-if args.title:
+    mic = songContents["microformat"]
+    mi = mic["microformatDataRenderer"]
+    formatDate = re.search('....',mi["publishDate"])
 
-    query = args.title
-    dir = args.directory
-    os.chdir(dir)
+    date = formatDate.group()
+    songData.append(date)
 
-elif args.song:
+    for file in files:
+        if re.search(songData[0],file,re.IGNORECASE):
+            currentFileName = file
+
+            id3 = ID3(file)
+            id3.add(TIT2(encoding=3,text=songData[0]))
+            id3.add(TPE1(encoding=3,text=songData[1]))
+            id3.add(TDRC(encoding=3,text=songData[2]))
+
+            id3.save(file)
+
+            if args.replace:
+                replacedFileName = songData[0]+".mp3"
+                os.replace(currentFileName,replacedFileName)
+
+            print("Metamusic added metadata to " + currentFileName)
+
+if args.song:
 
     dir = os.path.realpath(args.directory)
     dir = os.path.dirname(dir)
     os.chdir(dir)
 
-    # I'm not that good at regex
-    query = re.search('[^\/]*$',args.directory)
-    q = query.group()
-    # Get rid of the remaining period
-    query = re.sub('....$','',q)
-    print(query)
+    if args.title:
+
+        query = args.title
+
+    else:
+        query = re.search('[^\/]*$',args.directory)
+        q = query.group()
+        # Get rid of the remaining period
+        query = re.sub('....$','',q)
+
+    met = ytmusic.search(query,filter='songs')
+
+    songContents = search(met,results,pg)
+    getSong(songContents)
 
 else:
 # TODO Regex does not work with directories ending in a slash
@@ -252,18 +290,15 @@ else:
     dir = args.directory
     os.chdir(dir)
 
-    query = re.search('\/(?:.(?!\/))+$',dir,re.MULTILINE)
-    q = query.group()
-    query = re.sub('\/','',q)
+    if args.title:
 
-if args.song:
+        query = args.title
 
-    met = ytmusic.search(query,filter='songs')
+    else:
+        query = re.search('\/(?:.(?!\/))+$',dir,re.MULTILINE)
+        q = query.group()
+        query = re.sub('\/','',q)
 
-    songContents = search(met,results,pg)
-    getSong(songContents)
-
-else:
     met = ytmusic.search(query,filter='albums')
 
     albumContents = search(met,results,pg)
