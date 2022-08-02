@@ -283,21 +283,37 @@ if args.song:
     getSong(songContents)
 
 else:
-# TODO Regex does not work with directories ending in a slash
-# Make regex to get rid of the slash
 # TODO Regex doesnt work with passing in directories that the
 # user is currently on
-    dir = args.directory
-    os.chdir(dir)
+    try:
+        dir = args.directory
+        os.chdir(dir)
 
-    if args.title:
+        if args.title:
 
-        query = args.title
+            query = args.title
 
-    else:
-        query = re.search('\/(?:.(?!\/))+$',dir,re.MULTILINE)
-        q = query.group()
-        query = re.sub('\/','',q)
+        else:
+
+            print(dir)
+            # Directories that end in a slash will have that slash removed
+            if re.search('\/$',dir):
+                dir = re.sub('\/$','',dir)
+            # Directories that do not begin with a slash will have a slash
+            # added
+
+            if re.search('\/',dir):
+                pass
+            else:
+                dir = "/" + dir
+
+
+            print(dir)
+            query = re.search('\/(?!.*\/).*',dir,re.MULTILINE)
+            q = query.group()
+            query = re.sub('\/','',q)
+    except:
+        print("Invalid directory")
 
     met = ytmusic.search(query,filter='albums')
 
