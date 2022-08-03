@@ -9,6 +9,7 @@ parser.add_argument('directory', type=str, help="Specify a directory containing 
 parser.add_argument('-r','--replace',action='store_true',help="Replace file names with the names of tracks")
 parser.add_argument('-n','--numbered',action='store_true',help="Add the tracks number to the name of the file")
 parser.add_argument('-s','--song',action='store_true',help="Add the metadata of a single song")
+parser.add_argument('-o','--overwrite',action='store_true',help="Overwrite metadata on files")
 parser.add_argument('--title', type=str, metavar='TITLE',help="Manually enter the title of the name/song")
 args = parser.parse_args()
 
@@ -132,16 +133,17 @@ def getAlbum(albumContents):
     dirTitles = []
     audioFiles = []
     album = []
-    songs = []
 
     # Append all of the tracks in the album into an array
     # for ease of applying tags
-    for tracks in albumContents["tracks"]:
-        songs.append(tracks["title"])
-        art = tracks["artists"]
+    for t in albumContents["tracks"]:
+        songs = []
+        songs.append(t["title"])
+        art = t["artists"]
         art = art[0]
         songs.append(art["name"])
-        songs.append(tracks["album"])
+        songs.append(t["album"])
+
         album.append(songs)
 
 
@@ -173,6 +175,7 @@ def getAlbum(albumContents):
 
     for files in albumImgs:
         if files.endswith('.jpeg'):
+            albumImgs = files
             print("Album art created as: " + files)
             break
 
@@ -194,8 +197,22 @@ def getAlbum(albumContents):
               replacedFileName = ""
               numberedFileName = ""
 
-              print("Adding metadata to: " + tracks[i][0])
-              id3 = ID3(t)
+
+              try:
+                  id3 = ID3(t)
+              except:
+                  print("Skipping " + t )
+                  continue
+
+              if args.overwrite:
+                  try:
+                      id3.delete(t)
+                      print("Overwriting  metadata: " + tracks[i][0])
+                  except:
+                      continue
+              else:
+                  print("Adding metadata: " + tracks[i][0])
+
               id3.add(TIT2(encoding=3,text=tracks[i][0]))
               id3.add(TPE1(encoding=3,text=tracks[i][1]))
               id3.add(TALB(encoding=3,text=tracks[i][2]))
@@ -295,7 +312,6 @@ else:
 
         else:
 
-            print(dir)
             # Directories that end in a slash will have that slash removed
             if re.search('\/$',dir):
                 dir = re.sub('\/$','',dir)
@@ -308,7 +324,6 @@ else:
                 dir = "/" + dir
 
 
-            print(dir)
             query = re.search('\/(?!.*\/).*',dir,re.MULTILINE)
             q = query.group()
             query = re.sub('\/','',q)

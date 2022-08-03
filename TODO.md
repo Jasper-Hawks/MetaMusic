@@ -3,9 +3,9 @@
 - [x] Add status codes all throught to assure the user
 - [x] Have the ability to look at more than 5 searches
 - [x] Fix regex so that it can take input from directories that are on the same working directory
+- [x] Add error handling so that if there are no results something is printed to the screen, and the user can be prompted if they enter an incorrect selection
 - [ ] Refactor id3 section for clarity
 - [ ] Rename variables for clarity
-- [ ] Add error handling so that if there are no results something is printed to the screen, and the user can be prompted if they enter an incorrect selection
 - [ ] Convert file names to unescaped plain text for more matches
 - [ ] Print the names of the files we did not find (Maybe?)
 
@@ -15,7 +15,8 @@
 -    [x] Add a flag to add track numbers to the files
 -    [x] Add a flag to scrape data for songs
 -    [x] Make the title flag work with the songs flag
--    [ ] Make an overwrite flag
+-    [x] Make an overwrite flag
+-    [ ] Make a delete data flag
 
 # Bugs
 - [x] Fix songs missing metadata
@@ -33,3 +34,4 @@
 
       Added the file name to the ID3 method
 
+- [] Metadata being added to one song only
