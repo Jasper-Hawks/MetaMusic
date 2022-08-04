@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 import argparse, os, requests, re, json
-from mutagen.id3 import ID3, TIT2, TALB, TPE1, TDRC, TRCK, APIC
+from mutagen.id3 import ID3, TIT2, TALB, TPE1, TDRC, TRCK, APIC, ID3NoHeaderError
 from ytmusicapi import YTMusic
 
 
@@ -9,8 +9,9 @@ parser.add_argument('directory', type=str, help="Specify a directory containing 
 parser.add_argument('-r','--replace',action='store_true',help="Replace file names with the names of tracks")
 parser.add_argument('-n','--numbered',action='store_true',help="Add the tracks number to the name of the file")
 parser.add_argument('-s','--song',action='store_true',help="Add the metadata of a single song")
-parser.add_argument('-o','--overwrite',action='store_true',help="Overwrite metadata on files")
-parser.add_argument('--title', type=str, metavar='TITLE',help="Manually enter the title of the name/song")
+parser.add_argument('-o','--overwrite',action='store_true',help="Overwrite metadata on files/albums")
+parser.add_argument('-d','--delete',action='store_true',help="Delete files/albums' metadata")
+parser.add_argument('--title', type=str, metavar='TITLE',help="Manually enter the title of the album/song")
 args = parser.parse_args()
 
 #parser.add_argument(metavar='S', type=str)
@@ -25,6 +26,44 @@ indRes = []
 results = []
 browseIDs = []
 pg = 1
+
+def delAlbData(data):
+    mp3s = []
+    os.chdir(data)
+    files = os.listdir()
+
+    for file in files:
+        if file.endswith('.mp3'):
+            mp3s.append(file)
+
+    for m in mp3s:
+        try:
+            id3 = ID3(m)
+            id3.delete(m)
+            id3.save()
+            print(m + "'s metadata has been deleted")
+        except:
+            print(m + "'s metadata can not be deleted. Make sure that the file has metadata or redownload the file. ")
+    exit()
+
+def delSongData(data):
+    mp3s = []
+    files = os.listdir()
+
+    for file in files:
+        if file.endswith('.mp3'):
+            mp3s.append(file)
+
+    for m in mp3s:
+        if re.search(data,m,re.IGNORECASE):
+            try:
+                id3 = ID3(m)
+                id3.delete(m)
+                id3.save()
+                print(m + "'s metadata has been deleted")
+            except:
+                print(m + "'s metadata can not be deleted. Make sure that the file has metadata or redownload the file. ")
+    exit()
 
 def search(met, results,pg):
     # Searches with the API in order to find
@@ -55,7 +94,6 @@ def search(met, results,pg):
                       browseIDs.append(d["videoId"])
 
                     else:
-
                         break
 
                     # So we have as little repeating as possible
@@ -197,16 +235,18 @@ def getAlbum(albumContents):
               replacedFileName = ""
               numberedFileName = ""
 
-
               try:
                   id3 = ID3(t)
-              except:
+              except ID3NoHeaderError:
+                  print("no header")
+                  id3 = ID3()
                   print("Skipping " + t )
                   continue
 
               if args.overwrite:
                   try:
                       id3.delete(t)
+                      id3.save()
                       print("Overwriting  metadata: " + tracks[i][0])
                   except:
                       continue
@@ -294,6 +334,10 @@ if args.song:
         # Get rid of the remaining period
         query = re.sub('....$','',q)
 
+    if args.delete:
+        print("true")
+        delSongData(query)
+
     met = ytmusic.search(query,filter='songs')
 
     songContents = search(met,results,pg)
@@ -302,9 +346,12 @@ if args.song:
 else:
 # TODO Regex doesnt work with passing in directories that the
 # user is currently on
+    if args.delete:
+        delAlbData(args.directory)
     try:
         dir = args.directory
         os.chdir(dir)
+
 
         if args.title:
 
@@ -329,6 +376,7 @@ else:
             query = re.sub('\/','',q)
     except:
         print("Invalid directory")
+        exit()
 
     met = ytmusic.search(query,filter='albums')
 

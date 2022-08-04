@@ -16,7 +16,7 @@
 -    [x] Add a flag to scrape data for songs
 -    [x] Make the title flag work with the songs flag
 -    [x] Make an overwrite flag
--    [ ] Make a delete data flag
+-    [x] Make a delete data flag
 
 # Bugs
 - [x] Fix songs missing metadata
@@ -34,4 +34,3 @@
 
       Added the file name to the ID3 method
 
-- [] Metadata being added to one song only
