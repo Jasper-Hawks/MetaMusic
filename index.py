@@ -1,14 +1,14 @@
 #!/usr/bin/python3
-import argparse, os, requests, re, json
+import argparse, os, requests, re, json, sys
 from mutagen.id3 import ID3, TIT2, TALB, TPE1, TDRC, TRCK, APIC, ID3NoHeaderError
 from ytmusicapi import YTMusic
 
-
 parser = argparse.ArgumentParser(description="Add metadata to songs and albums with MetaMusic")
-parser.add_argument('directory', type=str, help="Specify a directory containing an album for metadata to be added to.")
+parser.add_argument('directory', type=str, help="Specify a directory containing an album for metadata to be added to.",nargs='?')
 parser.add_argument('-r','--replace',action='store_true',help="Replace file names with the names of tracks")
 parser.add_argument('-n','--numbered',action='store_true',help="Add the tracks number to the name of the file")
 parser.add_argument('-s','--song',action='store_true',help="Add the metadata of a single song")
+parser.add_argument('-i','--stdin',action='store_true',help="Use stdin instead of positional argument")
 parser.add_argument('-o','--overwrite',action='store_true',help="Overwrite metadata on files/albums")
 parser.add_argument('-d','--delete',action='store_true',help="Delete files/albums' metadata")
 parser.add_argument('--title', type=str, metavar='TITLE',help="Manually enter the title of the album/song")
@@ -16,8 +16,10 @@ args = parser.parse_args()
 
 #parser.add_argument(metavar='S', type=str)
 # Set up the header files
-ytmusic = YTMusic("headers_auth.json")
-
+try:
+    ytmusic = YTMusic("headers_auth.json")
+except:
+    print("Please generate a headers_auth.json file and make it accessable on your PATH.")
 # TODO Replace this with stdin
 # Find the input to search
 # Use regex to parse the last directory for querying
@@ -151,16 +153,16 @@ def search(met, results,pg):
 
     sel = int(input("Make a selection:"))
 
-# TODO Add a try catch here incase user puts something dumb
-    if sel <= 5 and sel >= 1:
-        sel = sel + ((pg - 1)  * 5)
+    if sel >= 1 and sel <= 5:
         if args.song:
             contents = ytmusic.get_song(browseIDs[sel - 1])
         else:
             contents = ytmusic.get_album(browseIDs[sel - 1])
     elif sel == 6:
-        pg += 1
+        pg+=1
         contents = search(met,results,pg)
+    else:
+        print("Please choose a number 1-5 or 6 for a new page")
 
     return contents
 
@@ -238,7 +240,6 @@ def getAlbum(albumContents):
               try:
                   id3 = ID3(t)
               except ID3NoHeaderError:
-                  print("no header")
                   id3 = ID3()
                   print("Skipping " + t )
                   continue
@@ -250,8 +251,7 @@ def getAlbum(albumContents):
                       print("Overwriting  metadata: " + tracks[i][0])
                   except:
                       continue
-              else:
-                  print("Adding metadata: " + tracks[i][0])
+              else: print("Adding metadata: " + tracks[i][0])
 
               id3.add(TIT2(encoding=3,text=tracks[i][0]))
               id3.add(TPE1(encoding=3,text=tracks[i][1]))
@@ -304,6 +304,13 @@ def getSong(songContents):
     for file in files:
         if re.search(songData[0],file,re.IGNORECASE):
             currentFileName = file
+            if args.overwrite:
+                try:
+                    id3.delete(file)
+                    id3.save()
+                    print("Overwriting  metadata: " + songData[0])
+                except:
+                    continue
 
             id3 = ID3(file)
             id3.add(TIT2(encoding=3,text=songData[0]))
@@ -346,11 +353,22 @@ if args.song:
 else:
 # TODO Regex doesnt work with passing in directories that the
 # user is currently on
+
+
+#    print(args.directory)
+
     if args.delete:
         delAlbData(args.directory)
     try:
-        dir = args.directory
-        os.chdir(dir)
+        if args.stdin:
+            for line in sys.stdin:
+                line = re.sub('\n','',line)
+                dir = line
+                os.chdir(dir)
+                break
+        else:
+            dir = args.directory
+            os.chdir(dir)
 
 
         if args.title:
@@ -370,7 +388,6 @@ else:
             else:
                 dir = "/" + dir
 
-
             query = re.search('\/(?!.*\/).*',dir,re.MULTILINE)
             q = query.group()
             query = re.sub('\/','',q)
@@ -382,5 +399,3 @@ else:
 
     albumContents = search(met,results,pg)
     getAlbum(albumContents)
-
-

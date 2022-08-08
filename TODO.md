@@ -4,8 +4,8 @@
 - [x] Have the ability to look at more than 5 searches
 - [x] Fix regex so that it can take input from directories that are on the same working directory
 - [x] Add error handling so that if there are no results something is printed to the screen, and the user can be prompted if they enter an incorrect selection
-- [ ] Refactor id3 section for clarity
-- [ ] Rename variables for clarity
+- [x] Refactor try catch no header exception
+- [x] Accept stdin
 - [ ] Convert file names to unescaped plain text for more matches
 - [ ] Print the names of the files we did not find (Maybe?)
 
@@ -17,6 +17,7 @@
 -    [x] Make the title flag work with the songs flag
 -    [x] Make an overwrite flag
 -    [x] Make a delete data flag
+-    [x] Make a stdin flag
 
 # Bugs
 - [x] Fix songs missing metadata
@@ -33,4 +34,7 @@
       the files name was being changed.
 
       Added the file name to the ID3 method
+
+- [ ] Fix stdin flag breaking the selection
+
 
