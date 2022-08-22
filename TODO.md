@@ -6,6 +6,7 @@
 - [x] Add error handling so that if there are no results something is printed to the screen, and the user can be prompted if they enter an incorrect selection
 - [x] Refactor try catch no header exception
 - [x] Accept stdin
+- [ ] Add stdin to songs
 - [ ] Convert file names to unescaped plain text for more matches
 - [ ] Print the names of the files we did not find (Maybe?)
 
@@ -35,6 +36,9 @@
 
       Added the file name to the ID3 method
 
-- [ ] Fix stdin flag breaking the selection
+- [x] Fix stdin flag breaking the selection
+      SOLUTION Had to close stdin. I was searching
+      for a way to close stdin because you have to
+      close files using a similar method.
 
 

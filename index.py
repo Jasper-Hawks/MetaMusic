@@ -8,7 +8,7 @@ parser.add_argument('directory', type=str, help="Specify a directory containing 
 parser.add_argument('-r','--replace',action='store_true',help="Replace file names with the names of tracks")
 parser.add_argument('-n','--numbered',action='store_true',help="Add the tracks number to the name of the file")
 parser.add_argument('-s','--song',action='store_true',help="Add the metadata of a single song")
-parser.add_argument('-i','--stdin',action='store_true',help="Use stdin instead of positional argument")
+parser.add_argument('-i','--stdin',action='store_true',help="Use stdin instead of the directory/song positional argument")
 parser.add_argument('-o','--overwrite',action='store_true',help="Overwrite metadata on files/albums")
 parser.add_argument('-d','--delete',action='store_true',help="Delete files/albums' metadata")
 parser.add_argument('--title', type=str, metavar='TITLE',help="Manually enter the title of the album/song")
@@ -151,18 +151,25 @@ def search(met, results,pg):
     print("Next Page")
     print("\n")
 
-    sel = int(input("Make a selection:"))
+    isSelecting = True
 
-    if sel >= 1 and sel <= 5:
-        if args.song:
-            contents = ytmusic.get_song(browseIDs[sel - 1])
+    while isSelecting:
+        try:
+            sel = int(input("Make a selection (? for options): "))
+        except ValueError:
+            sel = 0
+        if sel >= 1 and sel <= 5:
+            if args.song:
+                isSelecting = False
+                contents = ytmusic.get_song(browseIDs[sel - 1])
+            else:
+                isSelecting = False
+                contents = ytmusic.get_album(browseIDs[sel - 1])
+        elif sel == 6:
+            pg += 1
+            contents = search(met,results,pg)
         else:
-            contents = ytmusic.get_album(browseIDs[sel - 1])
-    elif sel == 6:
-        pg+=1
-        contents = search(met,results,pg)
-    else:
-        print("Please choose a number 1-5 or 6 for a new page")
+            print ("Please choose a number 1-5 to select an album/song or 6 for a new page of results")
 
     return contents
 
@@ -351,21 +358,20 @@ if args.song:
     getSong(songContents)
 
 else:
-# TODO Regex doesnt work with passing in directories that the
-# user is currently on
-
-
-#    print(args.directory)
 
     if args.delete:
         delAlbData(args.directory)
     try:
         if args.stdin:
+            res = []
             for line in sys.stdin:
-                line = re.sub('\n','',line)
-                dir = line
-                os.chdir(dir)
-                break
+                res.append(line.rstrip('\n'))
+
+            sys.stdin.close()
+            sys.stdin = open(os.ctermid())
+
+            dir = res[0]
+
         else:
             dir = args.directory
             os.chdir(dir)
