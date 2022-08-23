@@ -6,9 +6,13 @@
 - [x] Add error handling so that if there are no results something is printed to the screen, and the user can be prompted if they enter an incorrect selection
 - [x] Refactor try catch no header exception
 - [x] Accept stdin
-- [ ] Add stdin to songs
+- [x] Add stdin to songs
 - [ ] Convert file names to unescaped plain text for more matches
 - [ ] Print the names of the files we did not find (Maybe?)
+- [ ] Recreate the search system so that less identical matches are shown
+      when you go to the next page. Eventually stop the searches.
+- [ ] Replace the status code that finds the amount of tracks in an album with
+      the title and author of the album.
 
 # Argparse/Flags
 - [x] Create a CLI interface with the argparse library
@@ -19,6 +23,7 @@
 -    [x] Make an overwrite flag
 -    [x] Make a delete data flag
 -    [x] Make a stdin flag
+-    [ ] Selection flag to select the first result
 
 # Bugs
 - [x] Fix songs missing metadata
@@ -41,4 +46,17 @@
       for a way to close stdin because you have to
       close files using a similar method.
 
+- [x] Titles with special character [] can not be matched
 
+      Escaping special characters in track titles
+      in order to match more files to track titles.
+      The re.search method does not work with escaped
+      special characters since they are regex characters.
+
+      Searching for a new method to find escaped substrings
+      within a string.
+
+      SOLUTION Track names refrain from using [] instead using
+      (). Substituted those out and discovered the obvious
+      solution to case insensitive substring matching by converting
+      both strings to lowercase and using the in Python keyword.

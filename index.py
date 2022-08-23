@@ -5,12 +5,12 @@ from ytmusicapi import YTMusic
 
 parser = argparse.ArgumentParser(description="Add metadata to songs and albums with MetaMusic")
 parser.add_argument('directory', type=str, help="Specify a directory containing an album for metadata to be added to.",nargs='?')
-parser.add_argument('-r','--replace',action='store_true',help="Replace file names with the names of tracks")
-parser.add_argument('-n','--numbered',action='store_true',help="Add the tracks number to the name of the file")
-parser.add_argument('-s','--song',action='store_true',help="Add the metadata of a single song")
-parser.add_argument('-i','--stdin',action='store_true',help="Use stdin instead of the directory/song positional argument")
-parser.add_argument('-o','--overwrite',action='store_true',help="Overwrite metadata on files/albums")
 parser.add_argument('-d','--delete',action='store_true',help="Delete files/albums' metadata")
+parser.add_argument('-i','--stdin',action='store_true',help="Use stdin instead of the directory/song positional argument")
+parser.add_argument('-n','--numbered',action='store_true',help="Add the tracks number to the name of the file. (Songs can't be numbered)")
+parser.add_argument('-o','--overwrite',action='store_true',help="Overwrite metadata on files/albums")
+parser.add_argument('-r','--replace',action='store_true',help="Replace file names with the names of tracks")
+parser.add_argument('-s','--song',action='store_true',help="Add the metadata of a single song.")
 parser.add_argument('--title', type=str, metavar='TITLE',help="Manually enter the title of the album/song")
 args = parser.parse_args()
 
@@ -238,7 +238,13 @@ def getAlbum(albumContents):
       for i in range(len(tracks)):
           # Ignore the cases because files and and data titles may
           # capitilize different words
-          if re.search(tracks[i][0],t,re.IGNORECASE):
+
+          # TODO Decide whether we can use just the escaped track string or if
+          # we need both the track title and the escaped string. We probably
+          # just need the escaped track
+          escapedTrack = re.sub("\(","[",tracks[i][0])
+          escapedTrack = re.sub("\)","]",escapedTrack)
+          if tracks[i][0].lower() in t.lower() or escapedTrack.lower() in t.lower():
 
               currentFileName = t
               replacedFileName = ""
@@ -255,10 +261,10 @@ def getAlbum(albumContents):
                   try:
                       id3.delete(t)
                       id3.save()
-                      print("Overwriting  metadata: " + tracks[i][0])
+                      print("Overwriting  metadata: " + currentFileName)
                   except:
                       continue
-              else: print("Adding metadata: " + tracks[i][0])
+              else: print("Adding metadata: " + currentFileName)
 
               id3.add(TIT2(encoding=3,text=tracks[i][0]))
               id3.add(TPE1(encoding=3,text=tracks[i][1]))
@@ -283,11 +289,13 @@ def getAlbum(albumContents):
                   replacedFileName = tracks[i][0]+".mp3"
                   os.replace(currentFileName,replacedFileName)
                   currentFileName = tracks[i][0]+".mp3"
+                  print("Renamed: " + currentFileName + " to: " + replacedFileName)
 
               if args.numbered:
                   numberedFileName = str(i + 1) + "." + currentFileName
                   os.replace(currentFileName,numberedFileName)
                   currentFileName = numberedFileName + currentFileName
+                  print("Numbered: " + currentFileName + " to: " + numberedFileName)
 
 
     print("MetaMusic added metadata to " + str(f) + " files")
@@ -329,27 +337,41 @@ def getSong(songContents):
             if args.replace:
                 replacedFileName = songData[0]+".mp3"
                 os.replace(currentFileName,replacedFileName)
+                print("Renamed: " + currentFileName + " to: " + replacedFileName)
 
             print("Metamusic added metadata to " + currentFileName)
 
 if args.song:
 
-    dir = os.path.realpath(args.directory)
-    dir = os.path.dirname(dir)
-    os.chdir(dir)
+    if args.stdin:
+        res = []
+        for line in sys.stdin:
+            res.append(line.rstrip('\n'))
+
+        sys.stdin.close()
+        sys.stdin = open(os.ctermid())
+
+        dir = os.path.dirname(res[0])
+        os.chdir(dir)
+
+    else:
+
+        # TODO Review this
+        dir = os.path.realpath(args.directory)
+        dir = os.path.dirname(dir)
+        os.chdir(dir)
 
     if args.title:
 
         query = args.title
 
     else:
-        query = re.search('[^\/]*$',args.directory)
+        query = re.search('[^\/]*$',dir)
         q = query.group()
         # Get rid of the remaining period
         query = re.sub('....$','',q)
 
     if args.delete:
-        print("true")
         delSongData(query)
 
     met = ytmusic.search(query,filter='songs')
@@ -371,6 +393,7 @@ else:
             sys.stdin = open(os.ctermid())
 
             dir = res[0]
+            os.chdir(dir)
 
         else:
             dir = args.directory
