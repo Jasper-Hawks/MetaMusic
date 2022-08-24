@@ -1,11 +1,12 @@
 #!/usr/bin/python3
 import argparse, os, requests, re, json, sys
-from mutagen.id3 import ID3, TIT2, TALB, TPE1, TDRC, TRCK, APIC, ID3NoHeaderError
+from mutagen.id3 import ID3, TIT2, TALB, TPE1, TDRC, TRCK, APIC
 from ytmusicapi import YTMusic
 
 parser = argparse.ArgumentParser(description="Add metadata to songs and albums with MetaMusic")
 parser.add_argument('directory', type=str, help="Specify a directory containing an album for metadata to be added to.",nargs='?')
 parser.add_argument('-d','--delete',action='store_true',help="Delete files/albums' metadata")
+parser.add_argument('-f','--first',action='store_true',help="Select the first result in the list.")
 parser.add_argument('-i','--stdin',action='store_true',help="Use stdin instead of the directory/song positional argument")
 parser.add_argument('-n','--numbered',action='store_true',help="Add the tracks number to the name of the file. (Songs can't be numbered)")
 parser.add_argument('-o','--overwrite',action='store_true',help="Overwrite metadata on files/albums")
@@ -47,7 +48,6 @@ def delAlbData(data):
         except:
             print(m + "'s metadata can not be deleted. Make sure that the file has metadata or redownload the file. ")
     exit()
-
 def delSongData(data):
     mp3s = []
     files = os.listdir()
@@ -155,7 +155,11 @@ def search(met, results,pg):
 
     while isSelecting:
         try:
-            sel = int(input("Make a selection (? for options): "))
+
+            if args.first:
+                sel = 1
+            else:
+                sel = int(input("Make a selection (? for options): "))
         except ValueError:
             sel = 0
         if sel >= 1 and sel <= 5:
@@ -317,7 +321,11 @@ def getSong(songContents):
     songData.append(date)
 
     for file in files:
-        if re.search(songData[0],file,re.IGNORECASE):
+        # TODO Escape track titles similar to the way we did
+        # with albums
+        escapedTrack = re.sub("\(","[",songData[0])
+        escapedTrack = re.sub("\)","]",escapedTrack)
+        if escapedTrack.lower() in file.lower():
             currentFileName = file
             if args.overwrite:
                 try:

@@ -7,8 +7,8 @@
 - [x] Refactor try catch no header exception
 - [x] Accept stdin
 - [x] Add stdin to songs
-- [ ] Convert file names to unescaped plain text for more matches
-- [ ] Print the names of the files we did not find (Maybe?)
+- [x] Convert file names to unescaped plain text for more matches
+- [x] Escape characters on songs as well
 - [ ] Recreate the search system so that less identical matches are shown
       when you go to the next page. Eventually stop the searches.
 - [ ] Replace the status code that finds the amount of tracks in an album with
@@ -23,7 +23,7 @@
 -    [x] Make an overwrite flag
 -    [x] Make a delete data flag
 -    [x] Make a stdin flag
--    [ ] Selection flag to select the first result
+-    [x] Selection flag to select the first result
 
 # Bugs
 - [x] Fix songs missing metadata
