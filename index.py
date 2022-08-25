@@ -179,7 +179,6 @@ def search(met, results,pg):
 
 def getAlbum(albumContents):
 
-    print(str(albumContents["trackCount"]) + " tracks in " + albumContents["title"])
 
     dirTitles = []
     audioFiles = []
@@ -197,6 +196,7 @@ def getAlbum(albumContents):
 
         album.append(songs)
 
+    print(str(albumContents["trackCount"]) + " tracks in " + albumContents["title"] + " - " + art["name"])
 
     # Since the year and thumbnails are all the same
     # we don't need to put them in the nested arrays
@@ -325,7 +325,7 @@ def getSong(songContents):
         # with albums
         escapedTrack = re.sub("\(","[",songData[0])
         escapedTrack = re.sub("\)","]",escapedTrack)
-        if escapedTrack.lower() in file.lower():
+        if songData[0].lower() in file.lower() or escapedTrack.lower() in file.lower():
             currentFileName = file
             if args.overwrite:
                 try:

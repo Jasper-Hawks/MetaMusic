@@ -9,10 +9,10 @@
 - [x] Add stdin to songs
 - [x] Convert file names to unescaped plain text for more matches
 - [x] Escape characters on songs as well
+- [x] Replace the status code that finds the amount of tracks in an album with
+      the title and author of the album.
 - [ ] Recreate the search system so that less identical matches are shown
       when you go to the next page. Eventually stop the searches.
-- [ ] Replace the status code that finds the amount of tracks in an album with
-      the title and author of the album.
 
 # Argparse/Flags
 - [x] Create a CLI interface with the argparse library
