@@ -11,8 +11,6 @@
 - [x] Escape characters on songs as well
 - [x] Replace the status code that finds the amount of tracks in an album with
       the title and author of the album.
-- [ ] Recreate the search system so that less identical matches are shown
-      when you go to the next page. Eventually stop the searches.
 
 # Argparse/Flags
 - [x] Create a CLI interface with the argparse library
@@ -24,7 +22,9 @@
 -    [x] Make a delete data flag
 -    [x] Make a stdin flag
 -    [x] Selection flag to select the first result
-
+# At a later date
+- [ ] Recreate the search system so that less identical matches are shown
+      when you go to the next page. Eventually stop the searches.
 # Bugs
 - [x] Fix songs missing metadata
      SOLUTION Files and their metadata  can have small
