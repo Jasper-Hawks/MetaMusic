@@ -14,5 +14,5 @@ cp index.py /usr/local/bin/mm
 ```
 With the installed libraries MetaMusic should be ready to use.
 
-
+## Like the project? Support me here:
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/Q5Q8DP9QS)
