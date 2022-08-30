@@ -18,7 +18,7 @@ args = parser.parse_args()
 #parser.add_argument(metavar='S', type=str)
 # Set up the header files
 try:
-    ytmusic = YTMusic("headers_auth.json")
+    ytmusic = YTMusic()
 except:
     print("Please generate a headers_auth.json file and make it accessable on your PATH.")
 # TODO Replace this with stdin
