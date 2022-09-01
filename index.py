@@ -4,7 +4,7 @@ from mutagen.id3 import ID3, TIT2, TALB, TPE1, TDRC, TRCK, APIC
 from ytmusicapi import YTMusic
 
 parser = argparse.ArgumentParser(description="Add metadata to songs and albums with MetaMusic")
-parser.add_argument('directory', type=str, help="Specify a directory containing an album for metadata to be added to.",nargs='?')
+parser.add_argument('directory/file', type=str, help="Specify a directory/file containing an album/song for metadata to be added to.",nargs='?')
 parser.add_argument('-d','--delete',action='store_true',help="Delete files/albums' metadata")
 parser.add_argument('-f','--first',action='store_true',help="Select the first result in the list.")
 parser.add_argument('-i','--stdin',action='store_true',help="Use stdin instead of the directory/song positional argument")
