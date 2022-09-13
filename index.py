@@ -248,6 +248,7 @@ def getAlbum(albumContents):
           # just need the escaped track
           escapedTrack = re.sub("\(","[",tracks[i][0])
           escapedTrack = re.sub("\)","]",escapedTrack)
+          print(t + " : " + escapedTrack)
           if tracks[i][0].lower() in t.lower() or escapedTrack.lower() in t.lower():
 
               currentFileName = t

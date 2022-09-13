@@ -1,4 +1,5 @@
-# MetaMusic
+
+![MetaMusic Logo](./metamusic.png)
 MetaMusic is a metadata tag editor that uses an [unofficial Youtube Music API](https://pypi.org/project/ytmusicapi/) to apply tags to mp3 files.
 
 ## Installation
