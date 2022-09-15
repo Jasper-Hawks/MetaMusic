@@ -361,11 +361,12 @@ if args.song:
         sys.stdin = open(os.ctermid())
 
         dir = os.path.dirname(res[0])
+        filePath = res[0]
         os.chdir(dir)
 
     else:
 
-        # TODO Review this
+        filePath = args.directory
         dir = os.path.realpath(args.directory)
         dir = os.path.dirname(dir)
         os.chdir(dir)
@@ -375,9 +376,8 @@ if args.song:
         query = args.title
 
     else:
-        query = re.search('[^\/]*$',dir)
-        q = query.group()
-        # Get rid of the remaining period
+        q = re.search(r'[^\/]*$',filePath)
+        q = q.group(0)
         query = re.sub('....$','',q)
 
     if args.delete:
