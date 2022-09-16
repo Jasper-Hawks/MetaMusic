@@ -17,6 +17,8 @@ cp index.py /usr/local/bin/mm
 With the installed libraries MetaMusic should be ready to use.
 
 ## Usage
+**NOTE:** MetaMusic is very particular when it comes to which files it will add metadata to. It helps if the file name is AS CLOSE AS POSSIBLE to the name of the track in Youtube Music, otherwise the data may not be applied.  
+
 Below is the help message for MetaMusic:
 ```
 usage: (MetaMusic alias) [-h] [-d] [-f] [-i] [-n] [-o] [-r] [-s] [--title TITLE] [directory]
