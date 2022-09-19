@@ -378,7 +378,7 @@ def getSong(songContents):
         # with albums
         escapedTrack = re.sub("\(","[",songData[0])
         escapedTrack = re.sub("\)","]",escapedTrack)
-        if songData[0].lower() in file.lower() or escapedTrack.lower() in file.lower():
+        if file.lower() in songData[0].lower() or file.lower() in escapedTrack.lower():
             currentFileName = file
             if args.overwrite:
                 try:
