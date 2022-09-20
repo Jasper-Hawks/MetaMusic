@@ -245,7 +245,7 @@ def getAlbum(albumContents):
             escapedTrack = re.sub("\)","]",escapedTrack)
             # This if statement checks if the files have the name of the titles within them.
             # it also checks if the tracks are numbered.
-            if fileTitle.lower() in tracks[i][0].lower() or re.search("^" + trackNum  + "(?=\.)",fileTitle):
+            if fileTitle.lower() in tracks[i][0].lower() or re.search("^" + trackNum  + "(?=\.)",fileTitle) or escapedTrack.lower() in fileTitle.lower():
 
                 currentFileName = t
                 replacedFileName = ""
@@ -290,72 +290,6 @@ def getAlbum(albumContents):
                     currentFileName = numberedFileName + currentFileName
                     print("Numbered: " + currentFileName + " to: " + numberedFileName)
 
-#                print("Metadata applied to " + t)
-#   for t in dirTitles:
-#     for i in range(len(tracks)):
-#         # Ignore the cases because files and and data titles may
-#         # capitilize different words
-
-#         # TODO Decide whether we can use just the escaped track string or if
-#         # we need both the track title and the escaped string. We probably
-#         # just need the escaped track
-#         escapedTrack = re.sub("\(","[",tracks[i][0])
-#         escapedTrack = re.sub("\)","]",escapedTrack)
-#         if escapedTrack.lower() in t.lower():
-
-#             currentFileName = t
-#             replacedFileName = ""
-#             numberedFileName = ""
-
-#              try:
-#             id3 = ID3()
-#             except ID3NoHeaderError:
-#                 id3 = ID3()
-#                 print("Skipping " + t )
-#                 continue
-
-#             if args.overwrite:
-#                 try:
-#                     id3.delete(t)
-#                     id3.save()
-#                     print("Overwriting  metadata: " + currentFileName)
-#                 except:
-#                     continue
-#             else: print("Adding metadata: " + currentFileName)
-
-#             id3.add(TIT2(encoding=3,text=tracks[i][0]))
-#             id3.add(TPE1(encoding=3,text=tracks[i][1]))
-#             id3.add(TALB(encoding=3,text=tracks[i][2]))
-#             id3.add(TDRC(encoding=3,text=album[-2]))
-#             id3.add(TRCK(encoding=3,text=str(i + 1)))
-
-#             with open(albumImgs,'rb') as art:
-#                 id3.add(APIC(
-#                    encoding=3,
-#                    mime='image/jpeg',
-#                    type=3,desc=u'Cover',
-#                    data=art.read()
-#                 ))
-#             # TODO Error handling if art cant be added to a frame
-
-#             id3.save(t,v2_version=4)
-
-#             f += 1
-
-#             if args.replace:
-#                 replacedFileName = tracks[i][0]+".mp3"
-#                 os.replace(currentFileName,replacedFileName)
-#                 currentFileName = tracks[i][0]+".mp3"
-#                 print("Renamed: " + currentFileName + " to: " + replacedFileName)
-
-#             if args.numbered:
-#                 numberedFileName = str(i + 1) + "." + currentFileName
-#                 os.replace(currentFileName,numberedFileName)
-#                 currentFileName = numberedFileName + currentFileName
-#                 print("Numbered: " + currentFileName + " to: " + numberedFileName)
-
-
-#   print("MetaMusic added metadata to " + str(f) + " files")
 
 def getSong(songContents):
 
@@ -378,7 +312,7 @@ def getSong(songContents):
         # with albums
         escapedTrack = re.sub("\(","[",songData[0])
         escapedTrack = re.sub("\)","]",escapedTrack)
-        if file.lower() in songData[0].lower() or file.lower() in escapedTrack.lower():
+        if file.lower() in songData[0].lower() or file.lower() in escapedTrack.lower() or escapedTrack.lower() in file.lower():
             currentFileName = file
             if args.overwrite:
                 try:
