@@ -297,9 +297,6 @@ def getAlbum(albumContents):
                 print(str(j) + ". " + dirTitles[j])
 
             while(True):
-                #TODO Error handling with empty string
-                print(tries)
-                print(i)
 
                 trackSel = input(tracks[i][0] + " could not be found in your files. Please select the file that corresponds with " + tracks[i][0] + ": ")
                 if int(trackSel) >= 0 and int(trackSel) <= len(tracks):
@@ -367,8 +364,6 @@ def getSong(songContents):
     songData.append(date)
 
     for file in files:
-        # TODO Escape track titles similar to the way we did
-        # with albums
         escapedTrack = re.sub("\(","[",songData[0])
         escapedTrack = re.sub("\)","]",escapedTrack)
         # Count the amount of tracks and make sure we loop through that
@@ -396,17 +391,6 @@ def getSong(songContents):
                 print("Renamed: " + currentFileName + " to: " + replacedFileName)
 
             print("Metamusic added metadata to " + currentFileName)
-#       else:
-#           tries += 1
-
-#       if songData.len() == tries:
-#           print(file + " could not be found on album. Please select a track.")
-#           i = 0
-#           for range(len(songData)):
-#               i += 1
-#               print(i + "." + songData[0])
-#           input()
-#           tries = 0
 
 
 
