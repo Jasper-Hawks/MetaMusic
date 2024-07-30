@@ -241,8 +241,8 @@ def getAlbum(albumContents):
         for t in dirTitles:
             fileTitle = re.sub('....$','',t)
             trackNum = str(tracks.index(tracks[i]))
-            escapedTrack = re.sub("\(","[",tracks[i][0])
-            escapedTrack = re.sub("\)","]",escapedTrack)
+            escapedTrack = re.sub("(","[",tracks[i][0])
+            escapedTrack = re.sub(")","]",escapedTrack)
             # This if statement checks if the files have the name of the titles within them.
             # it also checks if the tracks are numbered.
             if tracks[i][0].lower() == fileTitle.lower() or fileTitle.lower() == escapedTrack.lower():
@@ -364,8 +364,8 @@ def getSong(songContents):
     songData.append(date)
 
     for file in files:
-        escapedTrack = re.sub("\(","[",songData[0])
-        escapedTrack = re.sub("\)","]",escapedTrack)
+        escapedTrack = re.sub("(","[",songData[0])
+        escapedTrack = re.sub(")","]",escapedTrack)
         # Count the amount of tracks and make sure we loop through that
         # Then if we can't find anything prompt the user.
         if songData[0].lower() in file.lower() or escapedTrack.lower() in file.lower():
@@ -465,19 +465,28 @@ else:
             # Directories that do not begin with a slash will have a slash
             # added
 
-            if re.search('\/',dir):
+            if re.search('/',dir):
                 pass
             else:
                 dir = "/" + dir
 
-            query = re.search('\/(?!.*\/).*',dir,re.MULTILINE)
+            query = re.search('/(?!.*/).*',dir,re.MULTILINE)
             q = query.group()
-            query = re.sub('\/','',q)
+            query = re.sub('/','',q)
     except:
         print("Invalid directory")
         exit()
 
+    print(query)
     met = ytmusic.search(query,filter='albums')
+
+#    print("met" +met)
+    for result in results:
+        print(result)
+        
+#    results.foreach(result => {print(result});
+#    print("results" +results)
+#    print("pg" +pg)
 
     albumContents = search(met,results,pg)
     getAlbum(albumContents)

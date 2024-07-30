@@ -216,8 +216,13 @@ def getAlbum(albumContents):
 
     print(album)
     # Write the thumbnail img to file
+    print("Thumbnail URL: " + thumb['url'])
     img = requests.get(thumb['url']).content
-    with open (album[0][2] + ".jpeg","wb") as handler:
+    # Truncate album title to help with longer album names
+    albumTitle = album[0][2]
+    albumTitle = albumTitle[:25]
+
+    with open ( albumTitle + ".jpeg","wb") as handler:
         handler.write(img)
 
     albumImgs = os.listdir()
