@@ -140,7 +140,7 @@ def search(met, results,pg):
     print("\n")
     c = 1
     print("["+ str(c)+"]")
-    for j in range(1,26):
+    for j in range(1,len(results)):
        print(results[j-1])
        if j % 5 == 0 and j != 0:
            print("\n")
@@ -186,7 +186,7 @@ def getAlbum(albumContents):
     for t in albumContents["tracks"]:
         songs = []
         songs.append(t["title"])
-        art = t["artists"]
+        art = albumContents["artists"]
         art = art[0]
         songs.append(art["name"])
         songs.append(t["album"])
@@ -216,9 +216,8 @@ def getAlbum(albumContents):
 
     print(album)
     # Write the thumbnail img to file
-    print("Thumbnail URL: " + thumb['url'])
     img = requests.get(thumb['url']).content
-    # Truncate album title to help with longer album names
+    # Truncate album title to help with longer album names not being saved to disk
     albumTitle = album[0][2]
     albumTitle = albumTitle[:25]
 
@@ -483,6 +482,6 @@ else:
         exit()
 
     met = ytmusic.search(query,filter='albums')
-
+    print(met)
     albumContents = search(met,results,pg)
     getAlbum(albumContents)
